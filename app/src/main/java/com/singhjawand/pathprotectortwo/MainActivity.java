@@ -50,6 +50,7 @@ public class MainActivity extends Activity implements GPSCallback {
     double firstTs;
     double timestamp;
     double lastPause;
+    double maxSpeedVal = 0;
 
     // driving information
     boolean isDriving = false;
@@ -126,7 +127,7 @@ public class MainActivity extends Activity implements GPSCallback {
     }
 
     public void updateInfo(String status) {
-        @SuppressLint("DefaultLocale") String info = "Current Speed: " + String.format("%.3f", currentSpeed) + " m/s\nMaximum Speed: " + currentTrip.maxSpeed + " m/s\nStatus: ";
+        @SuppressLint("DefaultLocale") String info = "Current Speed: " + String.format("%.3f", currentSpeed) + " m/s\nMaximum Speed: " + String.format("%.3f", maxSpeedVal) + " m/s\nStatus: ";
         currentTripTxt.setText(info + status);
         totalTimeTxt.setText(String.valueOf(tripsDatabase.getTotalTime()));
         totalSunsetTxt.setText(String.valueOf(tripsDatabase.getTotalNightTime()));
@@ -164,6 +165,9 @@ public class MainActivity extends Activity implements GPSCallback {
 
         // update timestamp
         timestamp = System.currentTimeMillis();
+
+        if (currentSpeed > maxSpeedVal)
+            maxSpeedVal = currentSpeed;
 
         // updates status
         if (currentSpeed > drivingThreshold) { // car
