@@ -1,4 +1,10 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+
+<ScrollView
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
@@ -40,7 +46,7 @@
                     android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:gravity="center"
-                    android:text="Time" />
+                    android:text="Date" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -61,14 +67,14 @@
                     android:layout_height="wrap_content"
                     android:layout_column="4"
                     android:gravity="center"
-                    android:text="Violations" />
+                    android:text="Max Speed" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_column="5"
                     android:gravity="center"
-                    android:text="Max Speed" />
+                    android:text="Violations" />
 
             </TableRow>
 
@@ -76,3 +82,4 @@
     </HorizontalScrollView>
 
 </ScrollView>
+</LinearLayout>

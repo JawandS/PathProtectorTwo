@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
@@ -88,7 +90,32 @@ public class MainActivity extends Activity implements GPSCallback {
 
     public void switchToLogs(View view) {
         setContentView(R.layout.activity_log);
-        // ToDo - populate the table from shared prefs
+        TableLayout spreadsheet = findViewById(R.id.mainTable);
+        for(int i = 0; i < tripsDatabase.getNumTrips(); i++){
+            DriverDB.Trip trip = tripsDatabase.getTrip(i);
+            TableRow dataRow = new TableRow(this);
+            TextView date = new TextView(this);
+            date.setText(trip.startingDate.toString());
+            TextView drivingTime = new TextView(this);
+            drivingTime.setText(((int)(trip.drivingTime / 3600)) + " hours " + ((int)(trip.drivingTime % 3600) / 60) + " minutes");
+            TextView nightDrivingTime = new TextView(this);
+            nightDrivingTime.setText(((int)(trip.nightDrivingTime / 3600)) + " hours " + ((int)(trip.nightDrivingTime % 3600) / 60) + " minutes");
+            TextView maxSpeed = new TextView(this);
+            maxSpeed.setText(trip.maxSpeed + " m/s");
+            TextView violations = new TextView(this);
+            Set<String> violationsSet = trip.violations;
+            String violationsString = "";
+            for(String violation : violationsSet){
+                violationsString += violation + "; ";
+            }
+            violations.setText(violationsString);
+            dataRow.addView(date);
+            dataRow.addView(drivingTime);
+            dataRow.addView(nightDrivingTime);
+            dataRow.addView(maxSpeed);
+            dataRow.addView(violations);
+            spreadsheet.addView(dataRow);
+        }
     }
 
     public void goToHome(View view) {
@@ -237,5 +264,83 @@ class TripInProgress {
             trip.violations.add(violations.get(i).getThird().toString() + ": " + violations.get(i).getFirst());
         }
         return trip;
+    }
+}
+
+class DriverDB {
+    SharedPreferences driverDB;
+
+    public DriverDB(Activity main) {
+        driverDB = main.getSharedPreferences("com.singhjawand.PathProtectorTwo.driverDB_File", Context.MODE_PRIVATE);
+    }
+
+    public int getNumTrips() {
+        return driverDB.getInt("numTrips", 0);
+    }
+
+    public float getTotalTime() {
+        return driverDB.getFloat("totalTime", 0);
+    }
+
+    public float getTotalNightTime() {
+        return driverDB.getFloat("totalNightTime", 0);
+    }
+
+    public int getNumViolations() {
+        return driverDB.getInt("numViolations", 0);
+    }
+
+
+    public static class Trip {
+        public Timestamp startingDate;
+        public Timestamp endingDate;
+        public float averageSpeed;
+        public float maxSpeed;
+        public float drivingTime;
+        public float nightDrivingTime;
+        public Set<String> violations;
+
+        public Trip() {
+            super();
+        }
+
+        public Trip(Timestamp startingDate, Timestamp endingDate, float averageSpeed, float maxSpeed, float drivingTime, float nightDrivingTime, Set<String> violations) {
+            this.startingDate = startingDate;
+            this.endingDate = endingDate;
+            this.averageSpeed = averageSpeed;
+            this.maxSpeed = maxSpeed;
+            this.drivingTime = drivingTime;
+            this.nightDrivingTime = nightDrivingTime;
+            this.violations = violations;
+        }
+    }
+
+    public void addTrip(Trip trip) {
+        SharedPreferences.Editor editor = driverDB.edit();
+        int numTrips = driverDB.getInt("numTrips", 0);
+        editor.putInt("numTrips", numTrips + 1);
+        editor.putLong("driver-trip-num-" + numTrips + "-startingDateUnixMillis", trip.startingDate.getTime());
+        editor.putFloat("driver-trip-num-" + numTrips + "-endingDateUnixMillis", trip.endingDate.getTime());
+        editor.putFloat("driver-trip-num-" + numTrips + "-averageSpeed", trip.averageSpeed);
+        editor.putFloat("driver-trip-num-" + numTrips + "-maxSpeed", trip.maxSpeed);
+        editor.putFloat("driver-trip-num-" + numTrips + "-drivingTime", trip.drivingTime);
+        editor.putFloat("totalTime", driverDB.getFloat("totalTime", 0) + trip.drivingTime);
+        editor.putFloat("driver-trip-num-" + numTrips + "-nightDrivingTime", trip.nightDrivingTime);
+        editor.putFloat("totalNightTime", driverDB.getFloat("totalNightTime", 0) + trip.nightDrivingTime);
+        editor.putStringSet("driver-trip-num-" + numTrips + "-violations", trip.violations);
+        editor.putInt("numViolations", driverDB.getInt("numViolations", 0) + trip.violations.size());
+        editor.apply();
+    }
+
+    public Trip getTrip(int n) {
+        return new Trip(
+                new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-startingDateUnixMillis", 0)),
+                new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-endingDateUnixMillis", 0)),
+                driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
+                driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
+                driverDB.getFloat("driver-trip-num-" + n + "-drivingTime", 0),
+                driverDB.getFloat("driver-trip-num-" + n + "-nightDrivingTime", 0),
+                driverDB.getStringSet("driver-trip-num-" + n + "-violations", new HashSet<String>())
+        );
     }
 }
