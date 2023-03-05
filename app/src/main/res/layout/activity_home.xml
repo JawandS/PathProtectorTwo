@@ -28,7 +28,7 @@
         android:layout_marginTop="8dp"
         android:background="#F44336"
         android:padding="0dp"
-        android:text="Start Drive!"
+        android:text="Review History!"
         android:textAlignment="center"
         android:textColor="#000000"
         android:textSize="20sp"

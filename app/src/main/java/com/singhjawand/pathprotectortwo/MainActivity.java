@@ -11,12 +11,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.math.BigDecimal;
-import java.sql.Driver;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -90,7 +88,7 @@ public class MainActivity extends Activity implements GPSCallback {
         }
     }
 
-    ArrayList<Location> trip_locations = new ArrayList<Location>();
+    ArrayList<Location> trip_locations = new ArrayList<>();
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -112,7 +110,7 @@ public class MainActivity extends Activity implements GPSCallback {
             timestampCounter += 1;
             statusTxt.setText("Status: Driving");
             if (!isDriving) { // began driving
-                trip_locations = new ArrayList<Location>();
+                trip_locations = new ArrayList<>();
                 trip_locations.add(location);
                 firstTs = timestamp;
                 startingDate = new Timestamp(date.getTime());
