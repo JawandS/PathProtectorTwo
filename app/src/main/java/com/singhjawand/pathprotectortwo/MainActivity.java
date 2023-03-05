@@ -47,14 +47,14 @@ public class MainActivity extends Activity implements GPSCallback {
     double maxWaitTime = 5 * 1000; // default is 4 minutes --> milliseconds
     double minDriveTime = 1000; // default is 1 minute --> milliseconds
     Date date;
-
-    DriverDB tripsDatabase = new DriverDB(this);
+    DriverDB tripsDatabase;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         // set up
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        tripsDatabase = new DriverDB(MainActivity.this);
 
         date = new Date();
         firstTs = System.currentTimeMillis();
@@ -142,9 +142,11 @@ public class MainActivity extends Activity implements GPSCallback {
         Log.v("ImportantInfo", "Saving data");
         float tripLength = (float) round((((timestamp - firstTs) / 1000.0) - (minDriveTime / 1000)), 3);
         DriverDB.Trip currentTrip = new DriverDB.Trip();
-        // Timestamp startingDate -> date timestamp of the beginnign of the drive
-        // ToDo - calculate: average speed during drive, max speed, day/night amount of driving
-        // ToDo - prompt user if they want to save, store in
+        currentTrip.tripLength = tripLength;
+        currentTrip.maxSpeed = (float) maxSpeed;
+        currentTrip.startingDate = startingDate;
+        currentTrip.dayNightRatio = 1; // ToDo - check what portion of trip was during the night
+        tripsDatabase.addTrip(currentTrip);
     }
 
     @Override
@@ -163,23 +165,25 @@ public class MainActivity extends Activity implements GPSCallback {
     }
 }
 
-class DriverDB{
+class DriverDB {
     SharedPreferences driverDB;
-    public DriverDB(Activity main){
-        driverDB = main.getSharedPreferences("com.example.myapp.driverDB_File", Context.MODE_PRIVATE);
+
+    public DriverDB(Activity main) {
+        driverDB = main.getSharedPreferences("com.singhjawand.PathProtectorTwo.driverDB_File", Context.MODE_PRIVATE);
     }
 
-    public static class Trip{
+    public static class Trip {
         public Timestamp startingDate;
-        public int tripLength;
+        public float tripLength;
         public float averageSpeed;
         public float maxSpeed;
         public float dayNightRatio;
 
-        public Trip(){
+        public Trip() {
             super();
         }
-        public Trip(Timestamp startingDate, int tripLength, float averageSpeed, float maxSpeed, float dayNightRatio){
+
+        public Trip(Timestamp startingDate, float tripLength, float averageSpeed, float maxSpeed, float dayNightRatio) {
             this.startingDate = startingDate;
             this.tripLength = tripLength;
             this.averageSpeed = averageSpeed;
@@ -188,29 +192,29 @@ class DriverDB{
         }
     }
 
-    public void addTrip(Trip trip){
+    public void addTrip(Trip trip) {
         SharedPreferences.Editor editor = driverDB.edit();
         int numTrips = driverDB.getInt("numTrips", 0);
         editor.putInt("numTrips", numTrips + 1);
         editor.putLong("driver-trip-num-" + numTrips + "-startingDateUnixMillis", trip.startingDate.getTime());
-        editor.putInt("driver-trip-num-" + numTrips + "-tripLength", trip.tripLength);
+        editor.putFloat("driver-trip-num-" + numTrips + "-tripLength", trip.tripLength);
         editor.putFloat("driver-trip-num-" + numTrips + "-averageSpeed", trip.averageSpeed);
         editor.putFloat("driver-trip-num-" + numTrips + "-maxSpeed", trip.maxSpeed);
         editor.putFloat("driver-trip-num-" + numTrips + "-dayNightRatio", trip.dayNightRatio);
         editor.apply();
     }
 
-    public int getNumTrips(){
+    public int getNumTrips() {
         return driverDB.getInt("numTrips", 0);
     }
 
-    public Trip getTrip(int n){
+    public Trip getTrip(int n) {
         return new Trip(
-            new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-startingDateUnixMillis", 0)),
-            driverDB.getInt("driver-trip-num-" + n + "-tripLength", 0),
-            driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
-            driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
-            driverDB.getFloat("driver-trip-num-" + n + "-dayNightRatio", 0)
+                new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-startingDateUnixMillis", 0)),
+                driverDB.getFloat("driver-trip-num-" + n + "-tripLength", 0),
+                driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
+                driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
+                driverDB.getFloat("driver-trip-num-" + n + "-dayNightRatio", 0)
         );
     }
 }
