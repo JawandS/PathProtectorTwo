@@ -2,6 +2,8 @@ package com.singhjawand.pathprotectortwo;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -9,11 +11,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import java.math.BigDecimal;
+import java.sql.Driver;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class MainActivity extends Activity implements GPSCallback {
@@ -42,6 +47,8 @@ public class MainActivity extends Activity implements GPSCallback {
     double maxWaitTime = 5 * 1000; // default is 4 minutes --> milliseconds
     double minDriveTime = 1000; // default is 1 minute --> milliseconds
     Date date;
+
+    DriverDB tripsDatabase = new DriverDB(this);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,6 +90,8 @@ public class MainActivity extends Activity implements GPSCallback {
         }
     }
 
+    ArrayList<Location> trip_locations = new ArrayList<Location>();
+
     @SuppressLint("SetTextI18n")
     @Override
     public void onGPSUpdate(Location location) {
@@ -103,6 +112,8 @@ public class MainActivity extends Activity implements GPSCallback {
             timestampCounter += 1;
             statusTxt.setText("Status: Driving");
             if (!isDriving) { // began driving
+                trip_locations = new ArrayList<Location>();
+                trip_locations.add(location);
                 firstTs = timestamp;
                 startingDate = new Timestamp(date.getTime());
                 lastPause = System.currentTimeMillis();
@@ -112,20 +123,28 @@ public class MainActivity extends Activity implements GPSCallback {
             statusTxt.setText("Status: Done Driving");
             // you are driving, not going fast enough, the wait has been long enough
             isDriving = false; // done driving
-            if (timestamp - firstTs > minDriveTime) // check drive is long enough
+            if (timestamp - firstTs > minDriveTime) { // check drive is long enough
                 promptUser(); // ask the user whether to store drive
+                resetState();
+            }
         } else {
             statusTxt.setText("Status: Still");
             lastPause = System.currentTimeMillis();
         }
     }
 
+    void resetState() {
+        trip_locations = null;
+        maxSpeed = 0;
+    }
+
     void promptUser() {
         Log.v("ImportantInfo", "Saving data");
-        String tripLength = String.valueOf(round((timestamp - firstTs) / 1000.0, 3) - (minDriveTime / 1000));
+        float tripLength = (float) round((((timestamp - firstTs) / 1000.0) - (minDriveTime / 1000)), 3);
+        DriverDB.Trip currentTrip = new DriverDB.Trip();
         // Timestamp startingDate -> date timestamp of the beginnign of the drive
         // ToDo - calculate: average speed during drive, max speed, day/night amount of driving
-        // ToDo - prompt user if they want to save, store in DB
+        // ToDo - prompt user if they want to save, store in
     }
 
     @Override
@@ -144,8 +163,54 @@ public class MainActivity extends Activity implements GPSCallback {
     }
 }
 
-/*statusTxt.setText("Update frequency: " + String.valueOf(round((timestamp - firstTs) / 1000 / timestampCounter, 3, BigDecimal.ROUND_HALF_UP)));
-        final String TAG = "important info";
-        Log.v(TAG, "Critical: " + (timestamp - firstTs));
-        Log.v(TAG, "Critical: " + timestampCounter);
-        Log.v(TAG, "Critical: " + (timestamp - firstTs) / 1000 / timestampCounter); */
+class DriverDB{
+    SharedPreferences driverDB;
+    public DriverDB(Activity main){
+        driverDB = main.getSharedPreferences("com.example.myapp.driverDB_File", Context.MODE_PRIVATE);
+    }
+
+    public static class Trip{
+        public Timestamp startingDate;
+        public int tripLength;
+        public float averageSpeed;
+        public float maxSpeed;
+        public float dayNightRatio;
+
+        public Trip(){
+            super();
+        }
+        public Trip(Timestamp startingDate, int tripLength, float averageSpeed, float maxSpeed, float dayNightRatio){
+            this.startingDate = startingDate;
+            this.tripLength = tripLength;
+            this.averageSpeed = averageSpeed;
+            this.maxSpeed = maxSpeed;
+            this.dayNightRatio = dayNightRatio;
+        }
+    }
+
+    public void addTrip(Trip trip){
+        SharedPreferences.Editor editor = driverDB.edit();
+        int numTrips = driverDB.getInt("numTrips", 0);
+        editor.putInt("numTrips", numTrips + 1);
+        editor.putLong("driver-trip-num-" + numTrips + "-startingDateUnixMillis", trip.startingDate.getTime());
+        editor.putInt("driver-trip-num-" + numTrips + "-tripLength", trip.tripLength);
+        editor.putFloat("driver-trip-num-" + numTrips + "-averageSpeed", trip.averageSpeed);
+        editor.putFloat("driver-trip-num-" + numTrips + "-maxSpeed", trip.maxSpeed);
+        editor.putFloat("driver-trip-num-" + numTrips + "-dayNightRatio", trip.dayNightRatio);
+        editor.apply();
+    }
+
+    public int getNumTrips(){
+        return driverDB.getInt("numTrips", 0);
+    }
+
+    public Trip getTrip(int n){
+        return new Trip(
+            new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-startingDateUnixMillis", 0)),
+            driverDB.getInt("driver-trip-num-" + n + "-tripLength", 0),
+            driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
+            driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
+            driverDB.getFloat("driver-trip-num-" + n + "-dayNightRatio", 0)
+        );
+    }
+}
