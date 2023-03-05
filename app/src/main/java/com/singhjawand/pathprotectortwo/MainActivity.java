@@ -122,9 +122,10 @@ public class MainActivity extends Activity implements GPSCallback {
 
     void promptUser() {
         Log.v("ImportantInfo", "Saving data");
-        String tripLength = String.valueOf(round((timestamp - firstTs) / 1000.0, 3) - minDriveTime);
-        // length of trip
-        otherInfoTxt.setText("Length of Drive: " + tripLength + " on " + startingDate);
+        String tripLength = String.valueOf(round((timestamp - firstTs) / 1000.0, 3) - (minDriveTime / 1000));
+        // Timestamp startingDate -> date timestamp of the beginnign of the drive
+        // ToDo - calculate: average speed during drive, max speed, day/night amount of driving
+        // ToDo - prompt user if they want to save, store in DB
     }
 
     @Override
