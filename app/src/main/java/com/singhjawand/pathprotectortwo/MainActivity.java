@@ -8,16 +8,13 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,14 +27,12 @@ public class MainActivity extends Activity implements GPSCallback {
     Boolean isGPSEnabled = false;
     LocationManager locationManager;
     double currentSpeed = 0.0;
-    double maxSpeed = 0.0;
 
     // text views
     TextView currentSpeedTxt;
     TextView maxSpeedTxt;
     TextView statusTxt;
     TextView otherInfoTxt;
-
 
 
     TripInProgress currentTrip = new TripInProgress();
@@ -96,8 +91,6 @@ public class MainActivity extends Activity implements GPSCallback {
         }
     }
 
-    ArrayList<Location> trip_locations = new ArrayList<>();
-
     @SuppressLint("SetTextI18n")
     @Override
     public void onGPSUpdate(Location location) {
@@ -105,7 +98,7 @@ public class MainActivity extends Activity implements GPSCallback {
         //Log.v("currentSpeed", currentSpeed+"");
         //Create a Toast with the text "Hello World"
         //Toast.makeText(getApplicationContext(), "Hello World", Toast.LENGTH_LONG).show();
-        
+
         currentSpeedTxt.setText("Current speed: " + currentSpeed + " m/s");
 
         // update timestamp
@@ -129,15 +122,7 @@ public class MainActivity extends Activity implements GPSCallback {
         }
     }
 
-    boolean isDark(String latVal, String longVal, Long timestamp) {
-        // isDark(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()), startingDate.getTime());
-        TimeZone tz = TimeZone.getDefault();
-        com.luckycatlabs.sunrisesunset.dto.Location location = new com.luckycatlabs.sunrisesunset.dto.Location(latVal, longVal);
-        SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(location, tz.getID());
-        Calendar officialSunset = calculator.getOfficialSunsetCalendarForDate(Calendar.getInstance());
-        return timestamp > officialSunset.getTimeInMillis();
-    }
-
+    @SuppressLint("SetTextI18n")
     void promptUser() {
         //Log.v("ImportantInfo", "Saving data");
         DriverDB.Trip dbTrip = currentTrip.finalizeTrip();
@@ -154,16 +139,9 @@ public class MainActivity extends Activity implements GPSCallback {
         gpsManager = null;
         super.onDestroy();
     }
-
-    public static double round(double unrounded, int precision) {
-        int roundingMode = BigDecimal.ROUND_HALF_UP;
-        BigDecimal bd = new BigDecimal(unrounded);
-        BigDecimal rounded = bd.setScale(precision, roundingMode);
-        return rounded.doubleValue();
-    }
 }
 
-class TripInProgress{
+class TripInProgress {
     ArrayList<Location> gpsLocations;
     ArrayList<Float> speedsInMetersPerSecond;
     Location startLocation;
@@ -174,32 +152,49 @@ class TripInProgress{
     float numNightSeconds;
     int numLocations = 0;
 
-    public TripInProgress(){
+    public TripInProgress() {
         gpsLocations = new ArrayList<>();
         speedsInMetersPerSecond = new ArrayList<>();
         numDaySeconds = 0;
         numNightSeconds = 0;
     }
 
-    public void addLocation(Location loc, Timestamp timestamp){
-        if(numLocations == 0){
+    public void addLocation(Location loc, Timestamp timestamp) {
+        if (numLocations == 0) {
             startLocation = loc;
             startTime = timestamp;
         }
+        long timeDiff = timestamp.getTime() - endTime.getTime();
         endLocation = loc;
         endTime = timestamp;
         gpsLocations.add(loc);
         speedsInMetersPerSecond.add(loc.getSpeed());
         numLocations++;
-        //Log.v("ImportantInfo", startLocation.getLatitude() + " " + startLocation.getLongitude() + " " + startLocation.getTime());
-        //Log.v("ImportantInfo", endLocation.getLatitude() + " " + endLocation.getLongitude() + " " + endLocation.getTime());
+        long sunsetTS = getSunset(String.valueOf(loc.getLatitude()), String.valueOf(loc.getLongitude()));
+        if (timestamp.getTime() > sunsetTS) { // you are in night
+            numNightSeconds += timeDiff / 1000.f;
+        } else {
+            numDaySeconds += timeDiff / 1000.f;
+        }
+        /*Log.v("ImportantInfo", startLocation.getLatitude() + " " + startLocation.getLongitude() + " " + startLocation.getTime());
+        Log.v("ImportantInfo", endLocation.getLatitude() + " " + endLocation.getLongitude() + " " + endLocation.getTime()); */
     }
-    public DriverDB.Trip finalizeTrip(){
+
+    public long getSunset(String latVal, String longVal) {
+        // isDark(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()), startingDate.getTime());
+        TimeZone tz = TimeZone.getDefault();
+        com.luckycatlabs.sunrisesunset.dto.Location location = new com.luckycatlabs.sunrisesunset.dto.Location(latVal, longVal);
+        SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(location, tz.getID());
+        Calendar officialSunset = calculator.getOfficialSunsetCalendarForDate(Calendar.getInstance());
+        return officialSunset.getTimeInMillis();
+    }
+
+    public DriverDB.Trip finalizeTrip() {
         DriverDB.Trip trip = new DriverDB.Trip();
         trip.startingDate = startTime;
         trip.tripLength = (float) (endTime.getTime() - startTime.getTime()) / 1000.f;
         float averageSpeed = 0;
-        for(int i = 0; i < speedsInMetersPerSecond.size(); i++){
+        for (int i = 0; i < speedsInMetersPerSecond.size(); i++) {
             averageSpeed += speedsInMetersPerSecond.get(i);
             //Log.v("averageSpeed", averageSpeed+"");
         }
