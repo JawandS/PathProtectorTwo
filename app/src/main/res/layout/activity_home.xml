@@ -7,9 +7,10 @@
 
     <ImageButton
         android:id="@+id/carImg"
-        android:layout_width="115dp"
+        android:layout_width="match_parent"
         android:layout_height="202dp"
         android:background="?android:selectableItemBackgroundBorderless"
+        android:onClick="switchToLogs"
         android:src="@drawable/_060466_289x130"
         android:text="DriverButton"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -17,7 +18,6 @@
         app:layout_constraintHorizontal_bias="0.8"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:onClick="switchToLogs"
         app:layout_constraintVertical_bias="0.91" />
 
     <TextView
@@ -25,7 +25,7 @@
         android:layout_width="292dp"
         android:layout_height="28dp"
         android:layout_marginTop="8dp"
-        android:background="#F44336"
+        android:background="#9C27B0"
         android:padding="0dp"
         android:text="Review History!"
         android:textAlignment="center"
@@ -39,43 +39,37 @@
         app:layout_constraintVertical_bias="0.689" />
 
     <TextView
-        android:id="@+id/text_home"
+        android:id="@+id/totalTimeTxt"
         android:layout_width="131dp"
         android:layout_height="43dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="25dp"
         android:padding="10dp"
         android:text="92 hours"
         android:textAlignment="center"
         android:textColor="#673AB7"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/main_box"
-        app:layout_constraintHorizontal_bias="0.537"
         app:layout_constraintStart_toEndOf="@+id/text_home2"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.133" />
 
     <TextView
-        android:id="@+id/text_home6"
+        android:id="@+id/totalSunsetTxt"
         android:layout_width="131dp"
         android:layout_height="43dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="25dp"
         android:padding="10dp"
         android:text="153 miles"
         android:textAlignment="center"
         android:textColor="#673AB7"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/main_box"
-        app:layout_constraintHorizontal_bias="0.517"
         app:layout_constraintStart_toEndOf="@+id/text_home2"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.264" />
 
     <TextView
-        android:id="@+id/lastTripTxt"
+        android:id="@+id/currentTripTxt"
         android:layout_width="165dp"
         android:layout_height="114dp"
         android:layout_marginTop="8dp"
@@ -85,11 +79,11 @@
         android:textColor="#673AB7"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/main_box2"
-        app:layout_constraintHorizontal_bias="0.301"
-        app:layout_constraintStart_toStartOf="@+id/main_box2"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.558" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintVertical_bias="0.558"
+        tools:layout_editor_absoluteX="98dp" />
 
     <TextView
         android:id="@+id/text_home2"
@@ -100,7 +94,7 @@
         android:layout_marginEnd="8dp"
         android:background="#9C27B0"
         android:padding="10dp"
-        android:text="Total Time:"
+        android:text="Total Hours"
         android:textAlignment="center"
         android:textColor="#000000"
         android:textSize="20sp"
@@ -120,7 +114,7 @@
         android:layout_marginEnd="8dp"
         android:background="#9C27B0"
         android:padding="10dp"
-        android:text="Total Miles"
+        android:text="Total Sunset"
         android:textAlignment="center"
         android:textColor="#000000"
         android:textSize="20sp"
@@ -135,103 +129,73 @@
         android:id="@+id/text_home8"
         android:layout_width="222dp"
         android:layout_height="47dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="#9C27B0"
         android:padding="10dp"
-        android:text="Latest Drive"
+        android:text="Current Drive"
         android:textAlignment="center"
         android:textColor="#000000"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/main_box2"
-        app:layout_constraintHorizontal_bias="0.479"
-        app:layout_constraintStart_toStartOf="@+id/main_box2"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.433" />
-
-    <TextView
-        android:id="@+id/main_box"
-        android:layout_width="291dp"
-        android:layout_height="176dp"
-        android:layout_marginTop="8dp"
-        android:background="#9900BCD4"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.494"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.133" />
-
-    <TextView
-        android:id="@+id/main_box2"
-        android:layout_width="291dp"
-        android:layout_height="176dp"
-        android:layout_marginTop="8dp"
-        android:background="#9900BCD4"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.508" />
-
-<!--    speed info-->
-
-    <TextView
-        android:id="@+id/currentSpeed"
-        android:layout_width="161dp"
-        android:layout_height="34dp"
-        android:padding="5dp"
-        android:text="Current Speed:"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.275"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_home7"
-        app:layout_constraintVertical_bias="0.0" />
-
-
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="184dp"
-        android:layout_height="31dp"
-        android:padding="5dp"
-        android:text="Status:"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.276"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_home7"
-        app:layout_constraintVertical_bias="0.161" />
-
-    <TextView
-        android:id="@+id/otherInfo"
-        android:layout_width="184dp"
-        android:layout_height="31dp"
-        android:padding="5dp"
-        android:text="Info:"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.276"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_home7"
-        app:layout_constraintVertical_bias="0.322" />
-
-    <TextView
-        android:id="@+id/maxSpeed"
-        android:layout_width="184dp"
-        android:layout_height="31dp"
-        android:padding="5dp"
-        android:text="Max Speed:"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.276"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_home7"
-        app:layout_constraintVertical_bias="0.484" />
+        app:layout_constraintVertical_bias="0.433"
+        tools:layout_editor_absoluteX="98dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!--    speed info-->
+
+    <!--<TextView-->
+    <!--android:id="@+id/currentSpeed"-->
+    <!--android:layout_width="161dp"-->
+    <!--android:layout_height="34dp"-->
+    <!--android:padding="5dp"-->
+    <!--android:text="Current Speed:"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintHorizontal_bias="0.275"-->
+    <!--app:layout_constraintLeft_toLeftOf="parent"-->
+    <!--app:layout_constraintRight_toRightOf="parent"-->
+    <!--app:layout_constraintTop_toBottomOf="@+id/text_home7"-->
+    <!--app:layout_constraintVertical_bias="0.0" />-->
+
+
+    <!--<TextView-->
+    <!--android:id="@+id/status"-->
+    <!--android:layout_width="184dp"-->
+    <!--android:layout_height="31dp"-->
+    <!--android:padding="5dp"-->
+    <!--android:text="Status:"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintHorizontal_bias="0.276"-->
+    <!--app:layout_constraintLeft_toLeftOf="parent"-->
+    <!--app:layout_constraintRight_toRightOf="parent"-->
+    <!--app:layout_constraintTop_toBottomOf="@+id/text_home7"-->
+    <!--app:layout_constraintVertical_bias="0.161" />-->
+
+    <!--<TextView-->
+    <!--android:id="@+id/otherInfo"-->
+    <!--android:layout_width="184dp"-->
+    <!--android:layout_height="31dp"-->
+    <!--android:padding="5dp"-->
+    <!--android:text="Info:"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintHorizontal_bias="0.276"-->
+    <!--app:layout_constraintLeft_toLeftOf="parent"-->
+    <!--app:layout_constraintRight_toRightOf="parent"-->
+    <!--app:layout_constraintTop_toBottomOf="@+id/text_home7"-->
+    <!--app:layout_constraintVertical_bias="0.322" />-->
+
+    <!--<TextView-->
+    <!--android:id="@+id/maxSpeed"-->
+    <!--android:layout_width="184dp"-->
+    <!--android:layout_height="31dp"-->
+    <!--android:padding="5dp"-->
+    <!--android:text="Max Speed:"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintHorizontal_bias="0.276"-->
+    <!--app:layout_constraintLeft_toLeftOf="parent"-->
+    <!--app:layout_constraintRight_toRightOf="parent"-->
+    <!--app:layout_constraintTop_toBottomOf="@+id/text_home7"-->
+    <!--app:layout_constraintVertical_bias="0.484" />-->

@@ -39,11 +39,9 @@ public class MainActivity extends Activity implements GPSCallback {
     double currentSpeed = 0.0;
 
     // text views
-    TextView currentSpeedTxt;
-    TextView maxSpeedTxt;
-    TextView statusTxt;
-    TextView otherInfoTxt;
-
+    TextView totalTimeTxt;
+    TextView totalSunsetTxt;
+    TextView currentTripTxt;
 
     TripInProgress currentTrip = new TripInProgress();
 
@@ -65,16 +63,19 @@ public class MainActivity extends Activity implements GPSCallback {
         // set up
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        // get views
+        totalTimeTxt = findViewById(R.id.totalTimeTxt);
+        totalSunsetTxt = findViewById(R.id.totalSunsetTxt);
+        currentTripTxt = findViewById(R.id.currentTripTxt);
+
+        // trips database
         tripsDatabase = new DriverDB(MainActivity.this);
+        totalTimeTxt.setText(String.valueOf(tripsDatabase.getTotalTime()));
+        totalSunsetTxt.setText(String.valueOf(tripsDatabase.getTotalNightTime()));
 
         date = new Date();
         firstTs = System.currentTimeMillis();
-
-        // get views
-        currentSpeedTxt = findViewById(R.id.currentSpeed);
-        maxSpeedTxt = findViewById(R.id.maxSpeed);
-        statusTxt = findViewById(R.id.status);
-        otherInfoTxt = findViewById(R.id.otherInfo);
 
         // access resources
         try {
@@ -89,30 +90,31 @@ public class MainActivity extends Activity implements GPSCallback {
         getCurrentSpeed();
     }
 
+    @SuppressLint("SetTextI18n")
     public void switchToLogs(View view) {
         setContentView(R.layout.activity_log);
         TableLayout spreadsheet = findViewById(R.id.mainTable);
-        for(int i = 0; i < tripsDatabase.getNumTrips(); i++){
+        for (int i = 0; i < tripsDatabase.getNumTrips(); i++) {
             DriverDB.Trip trip = tripsDatabase.getTrip(i);
-            TableRow dataRow = (TableRow)(LayoutInflater.from(this).inflate(R.layout.activity_log_row, null, false));
+            TableRow dataRow = (TableRow) (LayoutInflater.from(this).inflate(R.layout.activity_log_row, null, false));
 
-            TextView date = (TextView)dataRow.getChildAt(0);
+            TextView date = (TextView) dataRow.getChildAt(0);
             date.setText(trip.startingDate.toString());
 
-            TextView drivingTime = (TextView)dataRow.getChildAt(1);
-            drivingTime.setText(((int)(trip.drivingTime / 3600)) + " hours " + ((int)(trip.drivingTime % 3600) / 60) + " minutes");
+            TextView drivingTime = (TextView) dataRow.getChildAt(1);
+            drivingTime.setText(((int) (trip.drivingTime / 3600)) + " hours " + ((int) (trip.drivingTime % 3600) / 60) + " minutes");
 
-            TextView nightDrivingTime = (TextView)dataRow.getChildAt(2);
-            nightDrivingTime.setText(((int)(trip.nightDrivingTime / 3600)) + " hours " + ((int)(trip.nightDrivingTime % 3600) / 60) + " minutes");
+            TextView nightDrivingTime = (TextView) dataRow.getChildAt(2);
+            nightDrivingTime.setText(((int) (trip.nightDrivingTime / 3600)) + " hours " + ((int) (trip.nightDrivingTime % 3600) / 60) + " minutes");
 
-            TextView maxSpeed = (TextView)dataRow.getChildAt(3);
+            TextView maxSpeed = (TextView) dataRow.getChildAt(3);
             maxSpeed.setText(trip.maxSpeed + " m/s");
 
-            TextView violations = (TextView)dataRow.getChildAt(4);
+            TextView violations = (TextView) dataRow.getChildAt(4);
             Set<String> violationsSet = trip.violations;
             String violationsString = "";
-            if(violationsSet.size() == 0) violationsString = "no violations!";
-            for(String violation : violationsSet){
+            if (violationsSet.size() == 0) violationsString = "no violations!";
+            for (String violation : violationsSet) {
                 violationsString += violation + "\n";
             }
             violations.setText(violationsString);
@@ -145,7 +147,6 @@ public class MainActivity extends Activity implements GPSCallback {
         //Create a Toast with the text "Hello World"
         //Toast.makeText(getApplicationContext(), "Hello World", Toast.LENGTH_LONG).show();
 
-        currentSpeedTxt.setText("Speed: " + currentSpeed + " m/s");
         Log.v("status of speed", "Speed: " + currentSpeed + " m/s");
 
         // update timestamp
@@ -153,11 +154,11 @@ public class MainActivity extends Activity implements GPSCallback {
         // updates status
         if (currentSpeed > drivingThreshold) { // car
             isDriving = true;
-            statusTxt.setText("Status: Driving");
+            currentTripTxt.setText("Current Speed: " + currentSpeed + " m/s\nMaximum Speed: " + Collections.max(currentTrip.speedsInMetersPerSecond) + " m/s\nStatus: Driving");
             Log.v("stats", "driving");
             currentTrip.addLocation(location, new Timestamp(System.currentTimeMillis()));
         } else if (isDriving && currentSpeed < drivingThreshold && timestamp - lastPause > maxWaitTime) { // done driving
-            statusTxt.setText("Status: Done Driving");
+            currentTripTxt.setText("Current Speed: " + currentSpeed + " m/s\nMaximum Speed: " + Collections.max(currentTrip.speedsInMetersPerSecond) + " m/s\nStatus: Driving");
             Log.v("stats", "done driving");
             // you are driving, not going fast enough, the wait has been long enough
             isDriving = false; // done driving
@@ -166,7 +167,7 @@ public class MainActivity extends Activity implements GPSCallback {
                 currentTrip = new TripInProgress();
             }
         } else {
-            statusTxt.setText("Status: Still");
+            currentTripTxt.setText("Current Speed: " + currentSpeed + " m/s\nMaximum Speed: " + Collections.max(currentTrip.speedsInMetersPerSecond) + " m/s\nStatus: Still");
             Log.v("stats", "still");
             lastPause = System.currentTimeMillis();
         }
@@ -176,10 +177,12 @@ public class MainActivity extends Activity implements GPSCallback {
     void promptUser() {
         //Log.v("ImportantInfo", "Saving data");
         DriverDB.Trip dbTrip = currentTrip.finalizeTrip();
+        // update display
+        totalTimeTxt.setText(String.valueOf(tripsDatabase.getTotalTime()));
+        totalSunsetTxt.setText(String.valueOf(tripsDatabase.getTotalNightTime()));
         tripsDatabase.addTrip(dbTrip);
-        otherInfoTxt.setText((dbTrip.endingDate.getTime() - dbTrip.startingDate.getTime()) / 1000.f + " s");
 
-        //Toast.makeText(getApplicationContext(), dbTrip.tripLength + " m/s", Toast.LENGTH_LONG).show();
+//        Toast.makeText(getApplicationContext(), dbTrip.tripLength + " m/s", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -194,7 +197,6 @@ public class MainActivity extends Activity implements GPSCallback {
 class TripInProgress {
     ArrayList<Location> gpsLocations;
     ArrayList<Float> speedsInMetersPerSecond;
-    ArrayList<Timestamp> timestamps;
     Location startLocation;
     Location endLocation;
     Timestamp startTime;
@@ -331,6 +333,7 @@ class DriverDB {
         editor.putFloat("driver-trip-num-" + numTrips + "-nightDrivingTime", trip.nightDrivingTime);
         editor.putFloat("totalNightTime", driverDB.getFloat("totalNightTime", 0) + trip.nightDrivingTime);
         editor.putStringSet("driver-trip-num-" + numTrips + "-violations", trip.violations);
+        editor.putInt("numViolations", getNumViolations() + trip.violations.size());
         editor.apply();
     }
 
