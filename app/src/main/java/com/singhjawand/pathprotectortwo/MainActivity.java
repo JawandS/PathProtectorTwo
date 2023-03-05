@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -93,27 +94,28 @@ public class MainActivity extends Activity implements GPSCallback {
         TableLayout spreadsheet = findViewById(R.id.mainTable);
         for(int i = 0; i < tripsDatabase.getNumTrips(); i++){
             DriverDB.Trip trip = tripsDatabase.getTrip(i);
-            TableRow dataRow = new TableRow(this);
-            TextView date = new TextView(this);
+            TableRow dataRow = (TableRow)(LayoutInflater.from(this).inflate(R.layout.activity_log_row, null, false));
+
+            TextView date = (TextView)dataRow.getChildAt(0);
             date.setText(trip.startingDate.toString());
-            TextView drivingTime = new TextView(this);
+
+            TextView drivingTime = (TextView)dataRow.getChildAt(1);
             drivingTime.setText(((int)(trip.drivingTime / 3600)) + " hours " + ((int)(trip.drivingTime % 3600) / 60) + " minutes");
-            TextView nightDrivingTime = new TextView(this);
+
+            TextView nightDrivingTime = (TextView)dataRow.getChildAt(2);
             nightDrivingTime.setText(((int)(trip.nightDrivingTime / 3600)) + " hours " + ((int)(trip.nightDrivingTime % 3600) / 60) + " minutes");
-            TextView maxSpeed = new TextView(this);
+
+            TextView maxSpeed = (TextView)dataRow.getChildAt(3);
             maxSpeed.setText(trip.maxSpeed + " m/s");
-            TextView violations = new TextView(this);
+
+            TextView violations = (TextView)dataRow.getChildAt(4);
             Set<String> violationsSet = trip.violations;
             String violationsString = "";
+            if(violationsSet.size() == 0) violationsString = "no violations!";
             for(String violation : violationsSet){
-                violationsString += violation + "; ";
+                violationsString += violation + "\n";
             }
             violations.setText(violationsString);
-            dataRow.addView(date);
-            dataRow.addView(drivingTime);
-            dataRow.addView(nightDrivingTime);
-            dataRow.addView(maxSpeed);
-            dataRow.addView(violations);
 
             spreadsheet.addView(dataRow);
         }

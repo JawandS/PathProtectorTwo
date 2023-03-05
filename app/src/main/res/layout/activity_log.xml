@@ -17,9 +17,9 @@
         android:layout_marginBottom="1dp"
         android:foregroundGravity="center_vertical">
 
-        <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <TableLayout
             android:id="@+id/mainTable"
-            android:layout_width="1000sp"
+            android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:stretchColumns="1,2,3,4,5">
 
@@ -31,8 +31,8 @@
                     android:id="@+id/returnToHome"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_column="3"
-                    android:text="Home"
+                    android:layout_column="1"
+                    android:text="&lt; Home"
                     android:onClick="goToHome"/>
 
             </TableRow>
@@ -46,35 +46,40 @@
                     android:layout_height="wrap_content"
                     android:layout_column="1"
                     android:gravity="center"
-                    android:text="Date" />
+                    android:text="Date"
+                    android:padding="4sp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_column="2"
                     android:gravity="center"
-                    android:text="Total Hours" />
+                    android:text="Total Hours"
+                    android:padding="4sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_column="3"
                     android:gravity="center"
-                    android:text="Night Hours" />
+                    android:text="Night Hours"
+                    android:padding="4sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_column="4"
                     android:gravity="center"
-                    android:text="Max Speed" />
+                    android:text="Max Speed"
+                    android:padding="4sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_column="5"
                     android:gravity="center"
-                    android:text="Violations" />
+                    android:text="Violations"
+                    android:padding="4sp" />
 
             </TableRow>
 
