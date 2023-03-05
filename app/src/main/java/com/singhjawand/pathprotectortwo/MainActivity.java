@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
@@ -100,8 +101,8 @@ public class MainActivity extends Activity implements GPSCallback {
         //Create a Toast with the text "Hello World"
         //Toast.makeText(getApplicationContext(), "Hello World", Toast.LENGTH_LONG).show();
 
-        currentSpeedTxt.setText("Current speed: " + currentSpeed + " m/s");
-//        Log.v("current", "" + currentSpeed);
+        currentSpeedTxt.setText("Speed: " + currentSpeed + " m/s");
+        Log.v("status of speed", "Speed: " + currentSpeed + " m/s");
 
         // update timestamp
         timestamp = System.currentTimeMillis();
@@ -109,9 +110,11 @@ public class MainActivity extends Activity implements GPSCallback {
         if (currentSpeed > drivingThreshold) { // car
             isDriving = true;
             statusTxt.setText("Status: Driving");
+            Log.v("stats", "driving");
             currentTrip.addLocation(location, new Timestamp(System.currentTimeMillis()));
         } else if (isDriving && currentSpeed < drivingThreshold && timestamp - lastPause > maxWaitTime) { // done driving
             statusTxt.setText("Status: Done Driving");
+            Log.v("stats", "done driving");
             // you are driving, not going fast enough, the wait has been long enough
             isDriving = false; // done driving
             if (timestamp - firstTs > minDriveTime) { // check drive is long enough
@@ -120,6 +123,7 @@ public class MainActivity extends Activity implements GPSCallback {
             }
         } else {
             statusTxt.setText("Status: Still");
+            Log.v("stats", "still");
             lastPause = System.currentTimeMillis();
         }
     }
@@ -153,6 +157,8 @@ class TripInProgress {
     float numDaySeconds;
     float numNightSeconds;
     int numLocations = 0;
+    boolean droveDuringBadHours = false;
+    ArrayList<Pair<String, Integer>> violations = new ArrayList<>();
 
     public TripInProgress() {
         gpsLocations = new ArrayList<>();
@@ -164,7 +170,9 @@ class TripInProgress {
     public void addLocation(Location loc, Timestamp timestamp) {
         if (numLocations == 0) {
             startLocation = loc;
+            endLocation = startLocation;
             startTime = timestamp;
+            endTime = startTime;
         }
         long timeDiff = timestamp.getTime() - endTime.getTime();
         endLocation = loc;
@@ -177,12 +185,13 @@ class TripInProgress {
         } else {
             numDaySeconds += timeDiff / 1000.f;
         }
+        //between 1 and 4 AM
+        if(timestamp.after()
         /*Log.v("ImportantInfo", startLocation.getLatitude() + " " + startLocation.getLongitude() + " " + startLocation.getTime());
         Log.v("ImportantInfo", endLocation.getLatitude() + " " + endLocation.getLongitude() + " " + endLocation.getTime()); */
     }
 
     public boolean isDark(String latVal, String longVal, long timestamp) {
-        // isDark(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()), startingDate.getTime());
         TimeZone tz = TimeZone.getDefault();
         com.luckycatlabs.sunrisesunset.dto.Location location = new com.luckycatlabs.sunrisesunset.dto.Location(latVal, longVal);
         SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(location, tz.getID());
@@ -214,6 +223,10 @@ class DriverDB {
 
     public DriverDB(Activity main) {
         driverDB = main.getSharedPreferences("com.singhjawand.PathProtectorTwo.driverDB_File", Context.MODE_PRIVATE);
+    }
+
+    public static class DriverStats {
+
     }
 
     public static class Trip {
