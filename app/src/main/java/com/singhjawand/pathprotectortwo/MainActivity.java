@@ -94,20 +94,27 @@ public class MainActivity extends Activity implements GPSCallback {
             maxSpeedTxt.setText("Max speed: " + currentSpeed + " m/s");
         }
 
+        // update timestamp
+        timestamp = new Timestamp(date.getTime());
         // updates status
         if (currentSpeed > drivingThreshold) { // car
-            timestamp = new Timestamp(date.getTime());
             timestampCounter += 1;
             statusTxt.setText("Status: Driving");
             if (!isDriving) { // began driving
                 firstTs = timestamp;
+                lastPause = new Timestamp(date.getTime());
                 isDriving = true;
             }
-        } else if (isDriving && timestamp.getTime() - lastPause.getTime() > maxWaitTime) { // done driving
-            isDriving = false;
+        } else if (isDriving && currentSpeed < drivingThreshold && timestamp.getTime() - lastPause.getTime() > maxWaitTime) { // done driving
+            statusTxt.setText("Status: Done Driving");
+            // you are driving, not going fast enough, the wait has been long enough
+            isDriving = false; // done driving
+            otherInfoTxt.setText(String.valueOf((timestamp.getTime() - firstTs.getTime()) / 1000.0));
             if (timestamp.getTime() - firstTs.getTime() > minDriveTime) // check drive is long enough
                 promptUser(); // ask the user whether to store drive
         } else {
+            if (isDriving)
+                otherInfoTxt.setText("Length of Drive: " + (timestamp.getTime() - firstTs.getTime()) / 1000.0);
             statusTxt.setText("Status: Still");
             lastPause = new Timestamp(date.getTime());
         }
