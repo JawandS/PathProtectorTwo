@@ -159,7 +159,15 @@ public class MainActivity extends Activity implements GPSCallback {
 
         // update timestamp
         timestamp = System.currentTimeMillis();
-        String info = "Current Speed: " + String.format("%.3f", currentSpeed) + " m/s\nMaximum Speed: " + ((currentTrip.speedsInMetersPerSecond.size() == 0) ? 0 : String.format("%.3f", Collections.max(currentTrip.speedsInMetersPerSecond))) + " m/s\nStatus: ";
+
+        String info = "";
+        if(currentTrip.numLocations == 0){
+            info = "N/A\nNot Driving";
+        }else {
+            info = "Current Speed" + String.format("%.3f", currentSpeed)
+                    + " m/s\nMaximum Speed: " + currentTrip.maxSpeed
+                    + " m/s\nStatus: ";
+        }
         // updates status
         if (currentSpeed > drivingThreshold) { // car
             isDriving = true;
@@ -212,6 +220,7 @@ class TripInProgress {
     Timestamp endTime;
     float numDaySeconds;
     float numNightSeconds;
+    float maxSpeed = 0.f;
     int numLocations = 0;
     boolean droveDuringBadHours = false;
     ArrayList<Triple<String, Integer, Timestamp>> violations = new ArrayList<>();
@@ -234,8 +243,14 @@ class TripInProgress {
         long timeDiff = timestamp.getTime() - endTime.getTime();
         endLocation = loc;
         endTime = timestamp;
+
         gpsLocations.add(loc);
-        speedsInMetersPerSecond.add(loc.getSpeed());
+        float speed = loc.getSpeed();
+        speedsInMetersPerSecond.add(speed);
+        if(speed > maxSpeed){
+            maxSpeed = speed;
+        }
+
         if (isDark(String.valueOf(loc.getLatitude()), String.valueOf(loc.getLongitude()), timestamp.getTime())) {
             numNightSeconds += timeDiff / 1000.f;
         } else {
@@ -271,7 +286,7 @@ class TripInProgress {
         }
         averageSpeed /= speedsInMetersPerSecond.size();
         trip.averageSpeed = averageSpeed;
-        trip.maxSpeed = Collections.max(speedsInMetersPerSecond);
+        trip.maxSpeed = this.maxSpeed;
         trip.drivingTime = numDaySeconds + numNightSeconds;
         trip.nightDrivingTime = numNightSeconds;
         trip.violations = new HashSet<String>();
