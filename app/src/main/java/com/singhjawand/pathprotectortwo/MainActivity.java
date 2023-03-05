@@ -1,8 +1,13 @@
 package com.singhjawand.pathprotectortwo;
 
+import static android.app.PendingIntent.getActivity;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -45,7 +50,7 @@ public class MainActivity extends Activity implements GPSCallback {
 
     TripInProgress currentTrip = new TripInProgress();
 
-    double drivingThreshold = 0.4; // default is 2.7 m/s
+    double drivingThreshold = 0.15; // default is 2.7 m/s
     //    double movingThreshold = 0.3;
     double firstTs;
     double timestamp;
@@ -181,7 +186,6 @@ public class MainActivity extends Activity implements GPSCallback {
             isDriving = false; // done driving
             if (timestamp - firstTs > minDriveTime) { // check drive is long enough
                 promptUser(); // ask the user whether to store drive
-                currentTrip = new TripInProgress();
             }
             updateInfo("Done Driving");
         } else {
@@ -193,14 +197,22 @@ public class MainActivity extends Activity implements GPSCallback {
 
     @SuppressLint("SetTextI18n")
     void promptUser() {
-        //Log.v("ImportantInfo", "Saving data");
-        DriverDB.Trip dbTrip = currentTrip.finalizeTrip();
-        // update display
-        totalTimeTxt.setText(String.valueOf(tripsDatabase.getTotalTime()));
-        totalSunsetTxt.setText(String.valueOf(tripsDatabase.getTotalNightTime()));
-        tripsDatabase.addTrip(dbTrip);
-
-//        Toast.makeText(getApplicationContext(), dbTrip.tripLength + " m/s", Toast.LENGTH_LONG).show();
+        final DriverDB.Trip dbTrip = currentTrip.finalizeTrip();
+        currentTrip = new TripInProgress();
+        (new AlertDialog.Builder(this)).setMessage("Were you just driving?")
+            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // update display
+                    totalTimeTxt.setText(String.valueOf(tripsDatabase.getTotalTime()));
+                    totalSunsetTxt.setText(String.valueOf(tripsDatabase.getTotalNightTime()));
+                    tripsDatabase.addTrip(dbTrip);
+                }
+            })
+            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    //do nothing, throw away the database object
+                }
+            }).create().show();
     }
 
     @Override
@@ -371,7 +383,7 @@ class DriverDB {
                 driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
                 driverDB.getFloat("driver-trip-num-" + n + "-drivingTime", 0),
                 driverDB.getFloat("driver-trip-num-" + n + "-nightDrivingTime", 0),
-                driverDB.getStringSet("driver-trip-num-" + n + "-violations", new HashSet<String>())
+                driverDB.getStringSet("driver-trip-num-" + n + "-violations", new HashSet<>())
         );
     }
 }
