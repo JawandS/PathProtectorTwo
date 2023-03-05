@@ -22,7 +22,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TimeZone;
+
+import kotlin.Triple;
 
 public class MainActivity extends Activity implements GPSCallback {
     private GPSManager gpsManager = null;
@@ -150,6 +154,7 @@ public class MainActivity extends Activity implements GPSCallback {
 class TripInProgress {
     ArrayList<Location> gpsLocations;
     ArrayList<Float> speedsInMetersPerSecond;
+    ArrayList<Timestamp> timestamps;
     Location startLocation;
     Location endLocation;
     Timestamp startTime;
@@ -158,7 +163,7 @@ class TripInProgress {
     float numNightSeconds;
     int numLocations = 0;
     boolean droveDuringBadHours = false;
-    ArrayList<Pair<String, Integer>> violations = new ArrayList<>();
+    ArrayList<Triple<String, Integer, Timestamp>> violations = new ArrayList<>();
 
     public TripInProgress() {
         gpsLocations = new ArrayList<>();
@@ -179,16 +184,19 @@ class TripInProgress {
         endTime = timestamp;
         gpsLocations.add(loc);
         speedsInMetersPerSecond.add(loc.getSpeed());
-        numLocations++;
         if (isDark(String.valueOf(loc.getLatitude()), String.valueOf(loc.getLongitude()), timestamp.getTime())){
             numNightSeconds += timeDiff / 1000.f;
         } else {
             numDaySeconds += timeDiff / 1000.f;
         }
-        //between 1 and 4 AM
-        if(timestamp.after()
-        /*Log.v("ImportantInfo", startLocation.getLatitude() + " " + startLocation.getLongitude() + " " + startLocation.getTime());
-        Log.v("ImportantInfo", endLocation.getLatitude() + " " + endLocation.getLongitude() + " " + endLocation.getTime()); */
+        //between 12 AM and 4 AM, don't use getHours
+        if(timestamp.getHours() < 4 && timestamp.getHours() >= 0) {
+            droveDuringBadHours = true;
+            violations.add(new Triple<>("It is not legal to drive between the hours of 12 AM and 4 AM without a driver's permit!", numLocations, timestamp));
+        }
+        // /*Log.v("ImportantInfo", startLocation.getLatitude() + " " + startLocation.getLongitude() + " " + startLocation.getTime());
+        // Log.v("ImportantInfo", endLocation.getLatitude() + " " + endLocation.getLongitude() + " " + endLocation.getTime()); */
+        numLocations++; //this has to be the last thing that happens
     }
 
     public boolean isDark(String latVal, String longVal, long timestamp) {
@@ -214,6 +222,10 @@ class TripInProgress {
         trip.maxSpeed = Collections.max(speedsInMetersPerSecond);
         trip.drivingTime = numDaySeconds + numNightSeconds;
         trip.nightDrivingTime = numNightSeconds;
+        trip.violations = new HashSet<String>();
+        for (int i = 0; i < violations.size(); i++) {
+            trip.violations.add(violations.get(i).getThird().toString() + ": " + violations.get(i).getFirst());
+        }
         return trip;
     }
 }
@@ -236,18 +248,20 @@ class DriverDB {
         public float maxSpeed;
         public float drivingTime;
         public float nightDrivingTime;
+        public Set<String> violations;
 
         public Trip() {
             super();
         }
 
-        public Trip(Timestamp startingDate, Timestamp endingDate, float averageSpeed, float maxSpeed, float drivingTime, float nightDrivingTime) {
+        public Trip(Timestamp startingDate, Timestamp endingDate, float averageSpeed, float maxSpeed, float drivingTime, float nightDrivingTime, Set<String> violations){
             this.startingDate = startingDate;
             this.endingDate = endingDate;
             this.averageSpeed = averageSpeed;
             this.maxSpeed = maxSpeed;
             this.drivingTime = drivingTime;
             this.nightDrivingTime = nightDrivingTime;
+            this.violations = violations;
         }
     }
 
@@ -261,6 +275,7 @@ class DriverDB {
         editor.putFloat("driver-trip-num-" + numTrips + "-maxSpeed", trip.maxSpeed);
         editor.putFloat("driver-trip-num-" + numTrips + "-drivingTime", trip.drivingTime);
         editor.putFloat("driver-trip-num-" + numTrips + "-nightDrivingTime", trip.nightDrivingTime);
+        editor.putStringSet("driver-trip-num-" + numTrips + "-violations", trip.violations);
         editor.apply();
     }
 
@@ -275,7 +290,8 @@ class DriverDB {
             driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
             driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
             driverDB.getFloat("driver-trip-num-" + n + "-drivingTime", 0),
-            driverDB.getFloat("driver-trip-num-" + n + "-nightDrivingTime", 0)
+            driverDB.getFloat("driver-trip-num-" + n + "-nightDrivingTime", 0),
+            driverDB.getStringSet("driver-trip-num-" + n + "-violations", new HashSet<String>())
         );
     }
 }
