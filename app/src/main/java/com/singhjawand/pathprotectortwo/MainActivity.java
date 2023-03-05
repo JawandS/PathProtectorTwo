@@ -87,8 +87,8 @@ public class MainActivity extends Activity implements GPSCallback {
     }
 
     public void switchToLogs(View view) {
-
         setContentView(R.layout.activity_log);
+        // ToDo - populate the table from shared prefs
     }
 
     public void goToHome(View view) {
