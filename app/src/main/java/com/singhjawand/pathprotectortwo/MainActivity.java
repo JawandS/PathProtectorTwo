@@ -235,11 +235,25 @@ class DriverDB {
 
     public DriverDB(Activity main) {
         driverDB = main.getSharedPreferences("com.singhjawand.PathProtectorTwo.driverDB_File", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = driverDB.edit();
     }
 
-    public static class DriverStats {
-
+    public int getNumTrips() {
+        return driverDB.getInt("numTrips", 0);
     }
+
+    public float getTotalTime() {
+        return driverDB.getFloat("totalTime", 0);
+    }
+
+    public float getTotalNightTime() {
+        return driverDB.getFloat("totalNightTime", 0);
+    }
+
+    public int getNumViolations() {
+        return driverDB.getInt("numViolations", 0);
+    }
+
 
     public static class Trip {
         public Timestamp startingDate;
@@ -274,13 +288,12 @@ class DriverDB {
         editor.putFloat("driver-trip-num-" + numTrips + "-averageSpeed", trip.averageSpeed);
         editor.putFloat("driver-trip-num-" + numTrips + "-maxSpeed", trip.maxSpeed);
         editor.putFloat("driver-trip-num-" + numTrips + "-drivingTime", trip.drivingTime);
+        editor.putFloat("totalTime", driverDB.getFloat("totalTime", 0) + trip.drivingTime);
         editor.putFloat("driver-trip-num-" + numTrips + "-nightDrivingTime", trip.nightDrivingTime);
+        editor.putFloat("totalNightTime", driverDB.getFloat("totalNightTime", 0) + trip.nightDrivingTime);
         editor.putStringSet("driver-trip-num-" + numTrips + "-violations", trip.violations);
+        editor.putInt("numViolations", driverDB.getInt("numViolations", 0) + trip.violations.size());
         editor.apply();
-    }
-
-    public int getNumTrips() {
-        return driverDB.getInt("numTrips", 0);
     }
 
     public Trip getTrip(int n) {
