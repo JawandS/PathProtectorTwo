@@ -129,7 +129,7 @@ public class MainActivity extends Activity implements GPSCallback {
         //Log.v("ImportantInfo", "Saving data");
         DriverDB.Trip dbTrip = currentTrip.finalizeTrip();
         tripsDatabase.addTrip(dbTrip);
-        otherInfoTxt.setText(dbTrip.tripLength + " s");
+        otherInfoTxt.setText((dbTrip.endingDate.getTime() - dbTrip.startingDate.getTime())/1000.f + " s");
 
         //Toast.makeText(getApplicationContext(), dbTrip.tripLength + " m/s", Toast.LENGTH_LONG).show();
     }
@@ -172,8 +172,7 @@ class TripInProgress {
         gpsLocations.add(loc);
         speedsInMetersPerSecond.add(loc.getSpeed());
         numLocations++;
-        long sunsetTS = getSunset(String.valueOf(loc.getLatitude()), String.valueOf(loc.getLongitude()));
-        if (timestamp.getTime() > sunsetTS) { // you are in night
+        if (isDark(String.valueOf(loc.getLatitude()), String.valueOf(loc.getLongitude()), timestamp.getTime())){
             numNightSeconds += timeDiff / 1000.f;
         } else {
             numDaySeconds += timeDiff / 1000.f;
@@ -182,19 +181,20 @@ class TripInProgress {
         Log.v("ImportantInfo", endLocation.getLatitude() + " " + endLocation.getLongitude() + " " + endLocation.getTime()); */
     }
 
-    public long getSunset(String latVal, String longVal) {
+    public boolean isDark(String latVal, String longVal, long timestamp) {
         // isDark(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()), startingDate.getTime());
         TimeZone tz = TimeZone.getDefault();
         com.luckycatlabs.sunrisesunset.dto.Location location = new com.luckycatlabs.sunrisesunset.dto.Location(latVal, longVal);
         SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(location, tz.getID());
-        Calendar officialSunset = calculator.getOfficialSunsetCalendarForDate(Calendar.getInstance());
-        return officialSunset.getTimeInMillis();
+        long officialSunset = calculator.getOfficialSunsetCalendarForDate(Calendar.getInstance()).getTimeInMillis();
+        long officialSunrise = calculator.getOfficialSunriseCalendarForDate(Calendar.getInstance()).getTimeInMillis();
+        return timestamp > officialSunset || timestamp < officialSunrise;
     }
 
     public DriverDB.Trip finalizeTrip() {
         DriverDB.Trip trip = new DriverDB.Trip();
         trip.startingDate = startTime;
-        trip.tripLength = (float) (endTime.getTime() - startTime.getTime()) / 1000.f;
+        trip.endingDate = endTime;
         float averageSpeed = 0;
         for (int i = 0; i < speedsInMetersPerSecond.size(); i++) {
             averageSpeed += speedsInMetersPerSecond.get(i);
@@ -203,7 +203,8 @@ class TripInProgress {
         averageSpeed /= speedsInMetersPerSecond.size();
         trip.averageSpeed = averageSpeed;
         trip.maxSpeed = Collections.max(speedsInMetersPerSecond);
-        trip.dayNightRatio = !((numDaySeconds + numNightSeconds) == 0) ? numNightSeconds / (numDaySeconds + numNightSeconds) : Float.NaN;
+        trip.drivingTime = numDaySeconds + numNightSeconds;
+        trip.nightDrivingTime = numNightSeconds;
         return trip;
     }
 }
@@ -217,21 +218,23 @@ class DriverDB {
 
     public static class Trip {
         public Timestamp startingDate;
-        public float tripLength;
+        public Timestamp endingDate;
         public float averageSpeed;
         public float maxSpeed;
-        public float dayNightRatio;
+        public float drivingTime;
+        public float nightDrivingTime;
 
         public Trip() {
             super();
         }
 
-        public Trip(Timestamp startingDate, float tripLength, float averageSpeed, float maxSpeed, float dayNightRatio) {
+        public Trip(Timestamp startingDate, Timestamp endingDate, float averageSpeed, float maxSpeed, float drivingTime, float nightDrivingTime) {
             this.startingDate = startingDate;
-            this.tripLength = tripLength;
+            this.endingDate = endingDate;
             this.averageSpeed = averageSpeed;
             this.maxSpeed = maxSpeed;
-            this.dayNightRatio = dayNightRatio;
+            this.drivingTime = drivingTime;
+            this.nightDrivingTime = nightDrivingTime;
         }
     }
 
@@ -240,10 +243,11 @@ class DriverDB {
         int numTrips = driverDB.getInt("numTrips", 0);
         editor.putInt("numTrips", numTrips + 1);
         editor.putLong("driver-trip-num-" + numTrips + "-startingDateUnixMillis", trip.startingDate.getTime());
-        editor.putFloat("driver-trip-num-" + numTrips + "-tripLength", trip.tripLength);
+        editor.putFloat("driver-trip-num-" + numTrips + "-endingDateUnixMillis", trip.endingDate.getTime());
         editor.putFloat("driver-trip-num-" + numTrips + "-averageSpeed", trip.averageSpeed);
         editor.putFloat("driver-trip-num-" + numTrips + "-maxSpeed", trip.maxSpeed);
-        editor.putFloat("driver-trip-num-" + numTrips + "-dayNightRatio", trip.dayNightRatio);
+        editor.putFloat("driver-trip-num-" + numTrips + "-drivingTime", trip.drivingTime);
+        editor.putFloat("driver-trip-num-" + numTrips + "-nightDrivingTime", trip.nightDrivingTime);
         editor.apply();
     }
 
@@ -253,11 +257,12 @@ class DriverDB {
 
     public Trip getTrip(int n) {
         return new Trip(
-                new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-startingDateUnixMillis", 0)),
-                driverDB.getFloat("driver-trip-num-" + n + "-tripLength", 0),
-                driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
-                driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
-                driverDB.getFloat("driver-trip-num-" + n + "-dayNightRatio", 0)
+            new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-startingDateUnixMillis", 0)),
+            new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-endingDateUnixMillis", 0)),
+            driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
+            driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
+            driverDB.getFloat("driver-trip-num-" + n + "-drivingTime", 0),
+            driverDB.getFloat("driver-trip-num-" + n + "-nightDrivingTime", 0)
         );
     }
 }
