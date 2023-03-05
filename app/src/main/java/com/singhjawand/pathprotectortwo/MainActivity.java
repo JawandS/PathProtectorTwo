@@ -114,6 +114,7 @@ public class MainActivity extends Activity implements GPSCallback {
             dataRow.addView(nightDrivingTime);
             dataRow.addView(maxSpeed);
             dataRow.addView(violations);
+
             spreadsheet.addView(dataRow);
         }
     }
@@ -320,7 +321,7 @@ class DriverDB {
         int numTrips = driverDB.getInt("numTrips", 0);
         editor.putInt("numTrips", numTrips + 1);
         editor.putLong("driver-trip-num-" + numTrips + "-startingDateUnixMillis", trip.startingDate.getTime());
-        editor.putFloat("driver-trip-num-" + numTrips + "-endingDateUnixMillis", trip.endingDate.getTime());
+        editor.putLong("driver-trip-num-" + numTrips + "-endingDateUnixMillis", trip.endingDate.getTime());
         editor.putFloat("driver-trip-num-" + numTrips + "-averageSpeed", trip.averageSpeed);
         editor.putFloat("driver-trip-num-" + numTrips + "-maxSpeed", trip.maxSpeed);
         editor.putFloat("driver-trip-num-" + numTrips + "-drivingTime", trip.drivingTime);
@@ -328,7 +329,6 @@ class DriverDB {
         editor.putFloat("driver-trip-num-" + numTrips + "-nightDrivingTime", trip.nightDrivingTime);
         editor.putFloat("totalNightTime", driverDB.getFloat("totalNightTime", 0) + trip.nightDrivingTime);
         editor.putStringSet("driver-trip-num-" + numTrips + "-violations", trip.violations);
-        editor.putInt("numViolations", driverDB.getInt("numViolations", 0) + trip.violations.size());
         editor.apply();
     }
 
