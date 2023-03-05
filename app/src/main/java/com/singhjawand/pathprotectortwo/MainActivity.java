@@ -31,10 +31,11 @@ public class MainActivity extends Activity implements GPSCallback {
 
     double drivingThreshold = 0.4; // default is 2.7 m/s
     //    double movingThreshold = 0.3;
-    Timestamp firstTs;
-    Timestamp timestamp;
+    double firstTs;
+    double timestamp;
     int timestampCounter = 0;
-    Timestamp lastPause;
+    double lastPause;
+    Timestamp startingDate;
 
     // driving information
     boolean isDriving = false;
@@ -49,7 +50,7 @@ public class MainActivity extends Activity implements GPSCallback {
         setContentView(R.layout.activity_main);
 
         date = new Date();
-        firstTs = new Timestamp(date.getTime());
+        firstTs = System.currentTimeMillis();
 
         // get views
         currentSpeedTxt = findViewById(R.id.currentSpeed);
@@ -95,35 +96,35 @@ public class MainActivity extends Activity implements GPSCallback {
         }
 
         // update timestamp
-        timestamp = new Timestamp(date.getTime());
+        timestamp = System.currentTimeMillis();
+//        Log.v("timestamp", "" + timestamp);
         // updates status
         if (currentSpeed > drivingThreshold) { // car
             timestampCounter += 1;
             statusTxt.setText("Status: Driving");
             if (!isDriving) { // began driving
                 firstTs = timestamp;
-                lastPause = new Timestamp(date.getTime());
+                startingDate = new Timestamp(date.getTime());
+                lastPause = System.currentTimeMillis();
                 isDriving = true;
             }
-        } else if (isDriving && currentSpeed < drivingThreshold && timestamp.getTime() - lastPause.getTime() > maxWaitTime) { // done driving
+        } else if (isDriving && currentSpeed < drivingThreshold && timestamp - lastPause > maxWaitTime) { // done driving
             statusTxt.setText("Status: Done Driving");
             // you are driving, not going fast enough, the wait has been long enough
             isDriving = false; // done driving
-            otherInfoTxt.setText(String.valueOf((timestamp.getTime() - firstTs.getTime()) / 1000.0));
-            if (timestamp.getTime() - firstTs.getTime() > minDriveTime) // check drive is long enough
+            if (timestamp - firstTs > minDriveTime) // check drive is long enough
                 promptUser(); // ask the user whether to store drive
         } else {
-            if (isDriving)
-                otherInfoTxt.setText("Length of Drive: " + (timestamp.getTime() - firstTs.getTime()) / 1000.0);
             statusTxt.setText("Status: Still");
-            lastPause = new Timestamp(date.getTime());
+            lastPause = System.currentTimeMillis();
         }
     }
 
     void promptUser() {
         Log.v("ImportantInfo", "Saving data");
+        String tripLength = String.valueOf(round((timestamp - firstTs) / 1000.0, 3) - minDriveTime);
         // length of trip
-        otherInfoTxt.setText(String.valueOf(round((timestamp.getTime() - firstTs.getTime()) / 1000.0, 3)));
+        otherInfoTxt.setText("Length of Drive: " + tripLength + " on " + startingDate);
     }
 
     @Override
