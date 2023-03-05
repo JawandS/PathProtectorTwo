@@ -152,6 +152,7 @@ public class MainActivity extends Activity implements GPSCallback {
         Log.v("ImportantInfo", "Saving data");
         float tripLength = (float) round((((timestamp - firstTs) / 1000.0) - (minDriveTime / 1000)), 3);
         DriverDB.Trip currentTrip = new DriverDB.Trip();
+        otherInfoTxt.setText(String.valueOf(tripLength));
         currentTrip.tripLength = tripLength;
         currentTrip.maxSpeed = (float) maxSpeed;
         currentTrip.startingDate = startingDate;
