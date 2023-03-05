@@ -74,6 +74,8 @@ public class MainActivity extends Activity implements GPSCallback {
         totalTimeTxt.setText(String.valueOf(tripsDatabase.getTotalTime()));
         totalSunsetTxt.setText(String.valueOf(tripsDatabase.getTotalNightTime()));
 
+        updateInfo("Still");
+
         date = new Date();
         firstTs = System.currentTimeMillis();
 
@@ -124,7 +126,7 @@ public class MainActivity extends Activity implements GPSCallback {
     }
 
     public void updateInfo(String status) {
-        @SuppressLint("DefaultLocale") String info = "Current Speed: " + String.format("%.3f", currentSpeed) + " m/s\nMaximum Speed: " + ((currentTrip.speedsInMetersPerSecond.size() == 0) ? 0 : String.format("%.3f", Collections.max(currentTrip.speedsInMetersPerSecond))) + " m/s\nStatus: ";
+        @SuppressLint("DefaultLocale") String info = "Current Speed: " + String.format("%.3f", currentSpeed) + " m/s\nMaximum Speed: " + currentTrip.maxSpeed + " m/s\nStatus: ";
         currentTripTxt.setText(info + status);
         totalTimeTxt.setText(String.valueOf(tripsDatabase.getTotalTime()));
         totalSunsetTxt.setText(String.valueOf(tripsDatabase.getTotalNightTime()));
@@ -132,6 +134,9 @@ public class MainActivity extends Activity implements GPSCallback {
 
     public void goToHome(View view) {
         setContentView(R.layout.activity_home);
+        totalTimeTxt = findViewById(R.id.totalTimeTxt);
+        totalSunsetTxt = findViewById(R.id.totalSunsetTxt);
+        currentTripTxt = findViewById(R.id.currentTripTxt);
         updateInfo("Still");
     }
 
@@ -160,22 +165,13 @@ public class MainActivity extends Activity implements GPSCallback {
         // update timestamp
         timestamp = System.currentTimeMillis();
 
-        String info = "";
-        if(currentTrip.numLocations == 0){
-            info = "N/A\nNot Driving";
-        }else {
-            info = "Current Speed" + String.format("%.3f", currentSpeed)
-                    + " m/s\nMaximum Speed: " + currentTrip.maxSpeed
-                    + " m/s\nStatus: ";
-        }
         // updates status
         if (currentSpeed > drivingThreshold) { // car
             isDriving = true;
-            currentTripTxt.setText(info + "Driving");
             Log.v("stats", "driving");
             currentTrip.addLocation(location, new Timestamp(System.currentTimeMillis()));
+            updateInfo("Driving");
         } else if (isDriving && currentSpeed < drivingThreshold && timestamp - lastPause > maxWaitTime) { // done driving
-            currentTripTxt.setText(info + "Done Driving");
             Log.v("stats", "done driving");
             // you are driving, not going fast enough, the wait has been long enough
             isDriving = false; // done driving
@@ -183,10 +179,11 @@ public class MainActivity extends Activity implements GPSCallback {
                 promptUser(); // ask the user whether to store drive
                 currentTrip = new TripInProgress();
             }
+            updateInfo("Done Driving");
         } else {
-            currentTripTxt.setText(info + "Still");
             Log.v("stats", "still");
             lastPause = System.currentTimeMillis();
+            updateInfo("Not Driving");
         }
     }
 
