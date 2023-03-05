@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
@@ -100,6 +101,7 @@ public class MainActivity extends Activity implements GPSCallback {
         //Toast.makeText(getApplicationContext(), "Hello World", Toast.LENGTH_LONG).show();
 
         currentSpeedTxt.setText("Current speed: " + currentSpeed + " m/s");
+//        Log.v("current", "" + currentSpeed);
 
         // update timestamp
         timestamp = System.currentTimeMillis();
