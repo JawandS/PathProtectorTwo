@@ -377,13 +377,13 @@ class DriverDB {
 
     public Trip getTrip(int n) {
         return new Trip(
-                new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-startingDateUnixMillis", 0)),
-                new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-endingDateUnixMillis", 0)),
-                driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
-                driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
-                driverDB.getFloat("driver-trip-num-" + n + "-drivingTime", 0),
-                driverDB.getFloat("driver-trip-num-" + n + "-nightDrivingTime", 0),
-                driverDB.getStringSet("driver-trip-num-" + n + "-violations", new HashSet<>())
+            new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-startingDateUnixMillis", 0)),
+            new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-endingDateUnixMillis", 0)),
+            driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
+            driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
+            driverDB.getFloat("driver-trip-num-" + n + "-drivingTime", 0),
+            driverDB.getFloat("driver-trip-num-" + n + "-nightDrivingTime", 0),
+            driverDB.getStringSet("driver-trip-num-" + n + "-violations", new HashSet<>())
         );
     }
 }
