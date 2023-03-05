@@ -139,7 +139,7 @@ public class MainActivity extends Activity implements GPSCallback {
         }
     }
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint({"SetTextI18n", "DefaultLocale"})
     @Override
     public void onGPSUpdate(Location location) {
         currentSpeed = location.getSpeed();
@@ -151,14 +151,15 @@ public class MainActivity extends Activity implements GPSCallback {
 
         // update timestamp
         timestamp = System.currentTimeMillis();
+        String info = "Current Speed: " + String.format("%.3f", currentSpeed) + " m/s\nMaximum Speed: " + ((currentTrip.speedsInMetersPerSecond.size() == 0) ? 0 : String.format("%.3f", Collections.max(currentTrip.speedsInMetersPerSecond))) + " m/s\nStatus: ";
         // updates status
         if (currentSpeed > drivingThreshold) { // car
             isDriving = true;
-            currentTripTxt.setText("Current Speed: " + currentSpeed + " m/s\nMaximum Speed: " + Collections.max(currentTrip.speedsInMetersPerSecond) + " m/s\nStatus: Driving");
+            currentTripTxt.setText(info + "Driving");
             Log.v("stats", "driving");
             currentTrip.addLocation(location, new Timestamp(System.currentTimeMillis()));
         } else if (isDriving && currentSpeed < drivingThreshold && timestamp - lastPause > maxWaitTime) { // done driving
-            currentTripTxt.setText("Current Speed: " + currentSpeed + " m/s\nMaximum Speed: " + Collections.max(currentTrip.speedsInMetersPerSecond) + " m/s\nStatus: Driving");
+            currentTripTxt.setText(info + "Done Driving");
             Log.v("stats", "done driving");
             // you are driving, not going fast enough, the wait has been long enough
             isDriving = false; // done driving
@@ -167,7 +168,7 @@ public class MainActivity extends Activity implements GPSCallback {
                 currentTrip = new TripInProgress();
             }
         } else {
-            currentTripTxt.setText("Current Speed: " + currentSpeed + " m/s\nMaximum Speed: " + Collections.max(currentTrip.speedsInMetersPerSecond) + " m/s\nStatus: Still");
+            currentTripTxt.setText(info + "Still");
             Log.v("stats", "still");
             lastPause = System.currentTimeMillis();
         }
@@ -210,6 +211,7 @@ class TripInProgress {
     public TripInProgress() {
         gpsLocations = new ArrayList<>();
         speedsInMetersPerSecond = new ArrayList<>();
+        //speedsInMetersPerSecond.add(0.f);
         numDaySeconds = 0;
         numNightSeconds = 0;
     }
