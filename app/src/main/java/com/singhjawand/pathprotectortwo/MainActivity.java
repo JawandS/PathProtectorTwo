@@ -14,10 +14,14 @@ import android.widget.TextView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class MainActivity extends Activity implements GPSCallback {
     private GPSManager gpsManager = null;
@@ -104,7 +108,6 @@ public class MainActivity extends Activity implements GPSCallback {
 
         // update timestamp
         timestamp = System.currentTimeMillis();
-//        Log.v("timestamp", "" + timestamp);
         // updates status
         if (currentSpeed > drivingThreshold) { // car
             timestampCounter += 1;
@@ -134,6 +137,15 @@ public class MainActivity extends Activity implements GPSCallback {
     void resetState() {
         trip_locations = null;
         maxSpeed = 0;
+    }
+
+    boolean isDark(String latVal, String longVal, Long timestamp) {
+        // isDark(String.valueOf(location.getLatitude()), String.valueOf(location.getLongitude()), startingDate.getTime());
+        TimeZone tz = TimeZone.getDefault();
+        com.luckycatlabs.sunrisesunset.dto.Location location = new com.luckycatlabs.sunrisesunset.dto.Location(latVal, longVal);
+        SunriseSunsetCalculator calculator = new SunriseSunsetCalculator(location, tz.getID());
+        Calendar officialSunset = calculator.getOfficialSunsetCalendarForDate(Calendar.getInstance());
+        return timestamp > officialSunset.getTimeInMillis();
     }
 
     void promptUser() {
