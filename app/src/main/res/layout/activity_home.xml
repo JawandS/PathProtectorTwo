@@ -8,18 +8,18 @@
 
     <ImageButton
         android:id="@+id/carImg"
-        android:layout_width="292dp"
-        android:layout_height="120dp"
+        android:layout_width="115dp"
+        android:layout_height="202dp"
         android:background="?android:selectableItemBackgroundBorderless"
         android:src="@drawable/_060466_289x130"
         android:text="DriverButton"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintHorizontal_bias="0.8"
         app:layout_constraintStart_toStartOf="parent"
 
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.842" />
+        app:layout_constraintVertical_bias="0.91" />
 
     <TextView
         android:id="@+id/text_home7"
@@ -181,46 +181,59 @@
         app:layout_constraintVertical_bias="0.508" />
 
 <!--    speed info-->
-    <TextView
-        android:id="@+id/currentSpeed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Current Speed: ???"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:padding="20dp"
-        app:layout_constraintTop_toBottomOf="@+id/carImg" />
 
     <TextView
-        android:id="@+id/maxSpeed"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Max Speed: ???"
+        android:id="@+id/currentSpeed"
+        android:layout_width="184dp"
+        android:layout_height="31dp"
+        android:padding="5dp"
+        android:text="Current Speed: ???"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.275"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:padding="20dp"
-        app:layout_constraintTop_toBottomOf="@+id/currentSpeed"/>
+        app:layout_constraintTop_toBottomOf="@+id/text_home7"
+        app:layout_constraintVertical_bias="0.0" />
+
 
     <TextView
         android:id="@+id/status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:layout_width="184dp"
+        android:layout_height="31dp"
+        android:padding="5dp"
+        android:text="Hello World"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.276"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:padding="20sp"
-        app:layout_constraintTop_toBottomOf="@+id/maxSpeed"/>
+        app:layout_constraintTop_toBottomOf="@+id/text_home7"
+        app:layout_constraintVertical_bias="0.161" />
 
     <TextView
         android:id="@+id/otherInfo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:layout_width="184dp"
+        android:layout_height="31dp"
+        android:padding="5dp"
+        android:text="Hello World"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.276"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:padding="20sp"
-        app:layout_constraintTop_toBottomOf="@+id/status"/>
+        app:layout_constraintTop_toBottomOf="@+id/text_home7"
+        app:layout_constraintVertical_bias="0.322" />
+
+    <TextView
+        android:id="@+id/maxSpeed"
+        android:layout_width="184dp"
+        android:layout_height="31dp"
+        android:padding="5dp"
+        android:text="Hello World"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.276"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_home7"
+        app:layout_constraintVertical_bias="0.484" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
