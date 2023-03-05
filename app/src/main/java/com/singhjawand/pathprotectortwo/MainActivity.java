@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -36,13 +38,15 @@ public class MainActivity extends Activity implements GPSCallback {
     TextView statusTxt;
     TextView otherInfoTxt;
 
+
+
+    TripInProgress currentTrip = new TripInProgress();
+
     double drivingThreshold = 0.4; // default is 2.7 m/s
     //    double movingThreshold = 0.3;
     double firstTs;
     double timestamp;
-    int timestampCounter = 0;
     double lastPause;
-    Timestamp startingDate;
 
     // driving information
     boolean isDriving = false;
@@ -98,45 +102,31 @@ public class MainActivity extends Activity implements GPSCallback {
     @Override
     public void onGPSUpdate(Location location) {
         currentSpeed = location.getSpeed();
-        currentSpeed = round(currentSpeed, 3);
+        //Log.v("currentSpeed", currentSpeed+"");
+        //Create a Toast with the text "Hello World"
+        //Toast.makeText(getApplicationContext(), "Hello World", Toast.LENGTH_LONG).show();
+        
         currentSpeedTxt.setText("Current speed: " + currentSpeed + " m/s");
-
-        if (currentSpeed > maxSpeed) { // update maximum speed
-            maxSpeed = currentSpeed;
-            maxSpeedTxt.setText("Max speed: " + currentSpeed + " m/s");
-        }
 
         // update timestamp
         timestamp = System.currentTimeMillis();
         // updates status
         if (currentSpeed > drivingThreshold) { // car
-            timestampCounter += 1;
+            isDriving = true;
             statusTxt.setText("Status: Driving");
-            if (!isDriving) { // began driving
-                trip_locations = new ArrayList<>();
-                trip_locations.add(location);
-                firstTs = timestamp;
-                startingDate = new Timestamp(date.getTime());
-                lastPause = System.currentTimeMillis();
-                isDriving = true;
-            }
+            currentTrip.addLocation(location, new Timestamp(System.currentTimeMillis()));
         } else if (isDriving && currentSpeed < drivingThreshold && timestamp - lastPause > maxWaitTime) { // done driving
             statusTxt.setText("Status: Done Driving");
             // you are driving, not going fast enough, the wait has been long enough
             isDriving = false; // done driving
             if (timestamp - firstTs > minDriveTime) { // check drive is long enough
                 promptUser(); // ask the user whether to store drive
-                resetState();
+                currentTrip = new TripInProgress();
             }
         } else {
             statusTxt.setText("Status: Still");
             lastPause = System.currentTimeMillis();
         }
-    }
-
-    void resetState() {
-        trip_locations = null;
-        maxSpeed = 0;
     }
 
     boolean isDark(String latVal, String longVal, Long timestamp) {
@@ -149,15 +139,12 @@ public class MainActivity extends Activity implements GPSCallback {
     }
 
     void promptUser() {
-        Log.v("ImportantInfo", "Saving data");
-        float tripLength = (float) round((((timestamp - firstTs) / 1000.0) - (minDriveTime / 1000)), 3);
-        DriverDB.Trip currentTrip = new DriverDB.Trip();
-        otherInfoTxt.setText(String.valueOf(tripLength));
-        currentTrip.tripLength = tripLength;
-        currentTrip.maxSpeed = (float) maxSpeed;
-        currentTrip.startingDate = startingDate;
-        currentTrip.dayNightRatio = 1; // ToDo - check what portion of trip was during the night
-        tripsDatabase.addTrip(currentTrip);
+        //Log.v("ImportantInfo", "Saving data");
+        DriverDB.Trip dbTrip = currentTrip.finalizeTrip();
+        tripsDatabase.addTrip(dbTrip);
+        otherInfoTxt.setText(dbTrip.tripLength + " s");
+
+        //Toast.makeText(getApplicationContext(), dbTrip.tripLength + " m/s", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -173,6 +160,54 @@ public class MainActivity extends Activity implements GPSCallback {
         BigDecimal bd = new BigDecimal(unrounded);
         BigDecimal rounded = bd.setScale(precision, roundingMode);
         return rounded.doubleValue();
+    }
+}
+
+class TripInProgress{
+    ArrayList<Location> gpsLocations;
+    ArrayList<Float> speedsInMetersPerSecond;
+    Location startLocation;
+    Location endLocation;
+    Timestamp startTime;
+    Timestamp endTime;
+    float numDaySeconds;
+    float numNightSeconds;
+    int numLocations = 0;
+
+    public TripInProgress(){
+        gpsLocations = new ArrayList<>();
+        speedsInMetersPerSecond = new ArrayList<>();
+        numDaySeconds = 0;
+        numNightSeconds = 0;
+    }
+
+    public void addLocation(Location loc, Timestamp timestamp){
+        if(numLocations == 0){
+            startLocation = loc;
+            startTime = timestamp;
+        }
+        endLocation = loc;
+        endTime = timestamp;
+        gpsLocations.add(loc);
+        speedsInMetersPerSecond.add(loc.getSpeed());
+        numLocations++;
+        //Log.v("ImportantInfo", startLocation.getLatitude() + " " + startLocation.getLongitude() + " " + startLocation.getTime());
+        //Log.v("ImportantInfo", endLocation.getLatitude() + " " + endLocation.getLongitude() + " " + endLocation.getTime());
+    }
+    public DriverDB.Trip finalizeTrip(){
+        DriverDB.Trip trip = new DriverDB.Trip();
+        trip.startingDate = startTime;
+        trip.tripLength = (float) (endTime.getTime() - startTime.getTime()) / 1000.f;
+        float averageSpeed = 0;
+        for(int i = 0; i < speedsInMetersPerSecond.size(); i++){
+            averageSpeed += speedsInMetersPerSecond.get(i);
+            //Log.v("averageSpeed", averageSpeed+"");
+        }
+        averageSpeed /= speedsInMetersPerSecond.size();
+        trip.averageSpeed = averageSpeed;
+        trip.maxSpeed = Collections.max(speedsInMetersPerSecond);
+        trip.dayNightRatio = !((numDaySeconds + numNightSeconds) == 0) ? numNightSeconds / (numDaySeconds + numNightSeconds) : Float.NaN;
+        return trip;
     }
 }
 
