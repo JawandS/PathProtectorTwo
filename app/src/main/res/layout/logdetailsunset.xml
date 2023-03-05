@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/green" >
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        >
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/baseline_star_24"
+            ></ImageView>
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/baseline_wb_sunny_24"
+            ></ImageView>
+        <TextView
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:id="@+id/logdetaildate"
+            android:layout_weight="1"
+            android:text="date"
+            android:gravity="center"
+            android:textSize="30sp"
+            ></TextView>
+        <androidx.appcompat.widget.AppCompatButton
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:id="@+id/logdetailX"
+            android:text="X"
+            android:gravity="center"
+            android:textSize="30sp"
+            ></androidx.appcompat.widget.AppCompatButton>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:id="@+id/logdetailstarttime"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:text="start time: "
+            android:gravity="center_vertical"
+            >
+        </TextView>
+        <TextView
+            android:id="@+id/logdetailendtime"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="end time: "
+            android:gravity="center_vertical"
+            >
+        </TextView>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+    <TextView
+        android:id="@+id/logdetailtotaltime"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="sunset time"
+        android:gravity="center_vertical"
+        >
+    </TextView>
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:id="@+id/logdetaildaytime"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:text="day time: "
+            android:gravity="center_vertical"
+            >
+        </TextView>
+        <TextView
+            android:id="@+id/logdetailnighttime"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="night time:"
+            android:gravity="center_vertical"
+            >
+        </TextView>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</LinearLayout>
