@@ -123,8 +123,16 @@ public class MainActivity extends Activity implements GPSCallback {
         }
     }
 
+    public void updateInfo(String status) {
+        @SuppressLint("DefaultLocale") String info = "Current Speed: " + String.format("%.3f", currentSpeed) + " m/s\nMaximum Speed: " + ((currentTrip.speedsInMetersPerSecond.size() == 0) ? 0 : String.format("%.3f", Collections.max(currentTrip.speedsInMetersPerSecond))) + " m/s\nStatus: ";
+        currentTripTxt.setText(info + status);
+        totalTimeTxt.setText(String.valueOf(tripsDatabase.getTotalTime()));
+        totalSunsetTxt.setText(String.valueOf(tripsDatabase.getTotalNightTime()));
+    }
+
     public void goToHome(View view) {
         setContentView(R.layout.activity_home);
+        updateInfo("Still");
     }
 
     public void getCurrentSpeed() {
