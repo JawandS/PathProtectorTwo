@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Pair;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
@@ -85,6 +86,15 @@ public class MainActivity extends Activity implements GPSCallback {
         getCurrentSpeed();
     }
 
+    public void switchToLogs(View view) {
+
+        setContentView(R.layout.activity_log);
+    }
+
+    public void goToHome(View view) {
+        setContentView(R.layout.activity_home);
+    }
+
     public void getCurrentSpeed() {
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         gpsManager = new GPSManager(MainActivity.this);
@@ -137,7 +147,7 @@ public class MainActivity extends Activity implements GPSCallback {
         //Log.v("ImportantInfo", "Saving data");
         DriverDB.Trip dbTrip = currentTrip.finalizeTrip();
         tripsDatabase.addTrip(dbTrip);
-        otherInfoTxt.setText((dbTrip.endingDate.getTime() - dbTrip.startingDate.getTime())/1000.f + " s");
+        otherInfoTxt.setText((dbTrip.endingDate.getTime() - dbTrip.startingDate.getTime()) / 1000.f + " s");
 
         //Toast.makeText(getApplicationContext(), dbTrip.tripLength + " m/s", Toast.LENGTH_LONG).show();
     }
@@ -184,13 +194,13 @@ class TripInProgress {
         endTime = timestamp;
         gpsLocations.add(loc);
         speedsInMetersPerSecond.add(loc.getSpeed());
-        if (isDark(String.valueOf(loc.getLatitude()), String.valueOf(loc.getLongitude()), timestamp.getTime())){
+        if (isDark(String.valueOf(loc.getLatitude()), String.valueOf(loc.getLongitude()), timestamp.getTime())) {
             numNightSeconds += timeDiff / 1000.f;
         } else {
             numDaySeconds += timeDiff / 1000.f;
         }
         //between 12 AM and 4 AM, don't use getHours
-        if(timestamp.getHours() < 4 && timestamp.getHours() >= 0) {
+        if (timestamp.getHours() < 4 && timestamp.getHours() >= 0) {
             droveDuringBadHours = true;
             violations.add(new Triple<>("It is not legal to drive between the hours of 12 AM and 4 AM without a driver's permit!", numLocations, timestamp));
         }
@@ -268,7 +278,7 @@ class DriverDB {
             super();
         }
 
-        public Trip(Timestamp startingDate, Timestamp endingDate, float averageSpeed, float maxSpeed, float drivingTime, float nightDrivingTime, Set<String> violations){
+        public Trip(Timestamp startingDate, Timestamp endingDate, float averageSpeed, float maxSpeed, float drivingTime, float nightDrivingTime, Set<String> violations) {
             this.startingDate = startingDate;
             this.endingDate = endingDate;
             this.averageSpeed = averageSpeed;
@@ -298,13 +308,13 @@ class DriverDB {
 
     public Trip getTrip(int n) {
         return new Trip(
-            new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-startingDateUnixMillis", 0)),
-            new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-endingDateUnixMillis", 0)),
-            driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
-            driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
-            driverDB.getFloat("driver-trip-num-" + n + "-drivingTime", 0),
-            driverDB.getFloat("driver-trip-num-" + n + "-nightDrivingTime", 0),
-            driverDB.getStringSet("driver-trip-num-" + n + "-violations", new HashSet<String>())
+                new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-startingDateUnixMillis", 0)),
+                new Timestamp(driverDB.getLong("driver-trip-num-" + n + "-endingDateUnixMillis", 0)),
+                driverDB.getFloat("driver-trip-num-" + n + "-averageSpeed", 0),
+                driverDB.getFloat("driver-trip-num-" + n + "-maxSpeed", 0),
+                driverDB.getFloat("driver-trip-num-" + n + "-drivingTime", 0),
+                driverDB.getFloat("driver-trip-num-" + n + "-nightDrivingTime", 0),
+                driverDB.getStringSet("driver-trip-num-" + n + "-violations", new HashSet<String>())
         );
     }
 }

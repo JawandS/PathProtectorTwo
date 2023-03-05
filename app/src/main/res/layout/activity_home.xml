@@ -16,8 +16,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.8"
         app:layout_constraintStart_toStartOf="parent"
-
         app:layout_constraintTop_toTopOf="parent"
+        android:onClick="switchToLogs"
         app:layout_constraintVertical_bias="0.91" />
 
     <TextView
@@ -183,8 +183,8 @@
 
     <TextView
         android:id="@+id/currentSpeed"
-        android:layout_width="184dp"
-        android:layout_height="31dp"
+        android:layout_width="161dp"
+        android:layout_height="34dp"
         android:padding="5dp"
         android:text="Current Speed: ???"
         app:layout_constraintBottom_toBottomOf="parent"
