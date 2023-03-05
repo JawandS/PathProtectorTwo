@@ -51,7 +51,7 @@ public class MainActivity extends Activity implements GPSCallback {
     public void onCreate(Bundle savedInstanceState) {
         // set up
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_home);
         tripsDatabase = new DriverDB(MainActivity.this);
 
         date = new Date();
