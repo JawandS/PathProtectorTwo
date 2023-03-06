@@ -45,7 +45,7 @@ public class MainActivity extends Activity implements GPSCallback {
 
     TripInProgress currentTrip = new TripInProgress();
 
-    double drivingThreshold = 0.4; // default is 2.7 m/s
+    double drivingThreshold = 2.7; // default is 2.7 m/s
     //    double movingThreshold = 0.3;
     double firstTs;
     double timestamp;
@@ -54,8 +54,8 @@ public class MainActivity extends Activity implements GPSCallback {
 
     // driving information
     boolean isDriving = false;
-    double maxWaitTime = 5 * 1000; // default is 4 minutes --> milliseconds
-    double minDriveTime = 1000; // default is 1 minute --> milliseconds
+    double maxWaitTime = 4 * 60 * 1000; // default is 4 minutes --> milliseconds
+    double minDriveTime = 60 * 1000; // default is 1 minute --> milliseconds
     Date date;
     DriverDB tripsDatabase;
 
